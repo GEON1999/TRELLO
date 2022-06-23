@@ -1,5 +1,4 @@
-import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React from "react";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import { useForm } from "react-hook-form";
 import { useSetRecoilState } from "recoil";
@@ -15,6 +14,7 @@ interface IAreaProps {
 interface IBoard {
   toDos: IToDo[];
   boardId: string;
+  index: number;
 }
 
 interface IForm {
@@ -68,40 +68,12 @@ const Area = styled.div<IAreaProps>`
   border-radius: 5px;
 `;
 
-const Delete = styled.div<{ isDraggingOverforTrash: boolean }>`
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background-color: #e4e7ed;
-  position: fixed;
-  right: 30px;
-  bottom: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: transform 0.5s ease-in-out;
-  &:hover {
-    transform: scale(1.4);
-  }
-`;
-
-const Container = styled.div`
-  position: relative;
-  display: flex;
-  max-width: 680px;
-  width: 100%;
-  margin: 0 auto;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-`;
-
-function Board({ toDos, boardId }: IBoard) {
+function Board({ toDos, boardId, index }: IBoard) {
   const setToDos = useSetRecoilState(toDoState);
   const { register, setValue, handleSubmit } = useForm<IForm>();
   const onValid = ({ toDo }: IForm) => {
     const newToDo = {
-      id: Date.now(),
+      id: Math.floor(Date.now()),
       text: toDo,
     };
     setToDos((allBoard) => {
@@ -113,74 +85,46 @@ function Board({ toDos, boardId }: IBoard) {
     setValue("toDo", "");
   };
   return (
-    <Wrapper>
-      <Title>{boardId}</Title>
-      <Form onSubmit={handleSubmit(onValid)}>
-        <input
-          {...register("toDo", { required: "plz write down" })}
-          type="text"
-          placeholder={`New Todo`}
-        />
-      </Form>
-      <Droppable droppableId={"container"}>
-        {(provide, snapshot) => (
-          <>
-            <div ref={provide.innerRef}>
-              <Draggable index={1} draggableId={"wrapper"}>
-                {(provide, snapshot) => (
-                  <Container
-                    ref={provide.innerRef}
-                    {...provide.draggableProps}
-                    {...provide.dragHandleProps}
-                  >
-                    <Droppable droppableId={boardId}>
-                      {(provide, snapshot) => (
-                        <Area
-                          isDraggingOver={snapshot.isDraggingOver}
-                          isDraggingFromThis={Boolean(
-                            snapshot.draggingFromThisWith
-                          )}
-                          ref={provide.innerRef}
-                          //reference is how we can point or grab HTML elements with react code
-                          {...provide.droppableProps}
-                        >
-                          {toDos.map((toDo, index) => (
-                            <DragabbledCard
-                              key={toDo.id}
-                              toDoId={toDo.id}
-                              toDoText={toDo.text}
-                              index={index}
-                            />
-                          ))}
-                          {provide.placeholder}
-                        </Area>
-                      )}
-                    </Droppable>
-                  </Container>
-                )}
-              </Draggable>
-            </div>
-            {provide.placeholder}
-          </>
-        )}
-      </Droppable>
-
-      <Droppable droppableId={"trash"}>
-        {(provide, snapshot) => (
-          <>
-            <Delete
-              ref={provide.innerRef}
-              {...provide.droppableProps}
-              isDraggingOverforTrash={snapshot.isDraggingOver}
-            >
-              <FontAwesomeIcon icon={faTrashCan} size={"lg"} />
-            </Delete>
-            {provide.placeholder}
-          </>
-        )}
-      </Droppable>
-    </Wrapper>
+    <Draggable index={index} draggableId={boardId} key={boardId}>
+      {(provide) => (
+        <Wrapper
+          ref={provide.innerRef}
+          {...provide.draggableProps}
+          {...provide.dragHandleProps}
+        >
+          <Title>{boardId}</Title>
+          <Form onSubmit={handleSubmit(onValid)}>
+            <input
+              {...register("toDo", { required: "plz write down" })}
+              type="text"
+              placeholder={`New Todo`}
+            />
+          </Form>
+          <Droppable droppableId={boardId}>
+            {(provide, snapshot) => (
+              <Area
+                isDraggingOver={snapshot.isDraggingOver}
+                isDraggingFromThis={Boolean(snapshot.draggingFromThisWith)}
+                ref={provide.innerRef}
+                //reference is how we can point or grab HTML elements with react code
+                {...provide.droppableProps}
+              >
+                {toDos.map((toDo, index) => (
+                  <DragabbledCard
+                    key={toDo.id}
+                    toDoId={toDo.id}
+                    toDoText={toDo.text}
+                    index={index}
+                  />
+                ))}
+                {provide.placeholder}
+              </Area>
+            )}
+          </Droppable>
+        </Wrapper>
+      )}
+    </Draggable>
   );
 }
 
-export default Board;
+export default React.memo(Board);
