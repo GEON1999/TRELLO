@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/TRELLO/static/css/main.c6b59ba4.css",
+    "main.js": "/TRELLO/static/js/main.8ffb2f80.js",
+    "index.html": "/TRELLO/index.html",
+    "main.c6b59ba4.css.map": "/TRELLO/static/css/main.c6b59ba4.css.map",
+    "main.8ffb2f80.js.map": "/TRELLO/static/js/main.8ffb2f80.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c6b59ba4.css",
+    "static/js/main.8ffb2f80.js"
+  ]
+}
